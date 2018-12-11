@@ -5,12 +5,13 @@ using EpubSharp;
 // using UnityEngine.UI;
 using TMPro;
 using System.Text.RegularExpressions;
+using UnityEditor;
 
 public class PageController : MonoBehaviour
 {
     public Camera camera;
 
-    public string bookPath;
+    private string bookPath;
     private string bookText;
     private LinkedListNode<string> curText;
 
@@ -24,6 +25,7 @@ public class PageController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        bookPath = Application.streamingAssetsPath + "/ebooks/pg135.epub";
         EpubBook book = EpubReader.Read(bookPath);
 
         chapterTexts = new LinkedList<string>();
@@ -108,11 +110,14 @@ public class PageController : MonoBehaviour
         if (pageOne.pageToDisplay > pageOne.textInfo.pageCount)
         {
             // Next chapter
-            PrepareUpdateText();
-            UpdateText(curText.Next);
+            if (curText.Next != null)
+            {
+                PrepareUpdateText();
+                UpdateText(curText.Next);
 
-            pageOne.pageToDisplay = 1;
-            pageTwo.pageToDisplay = 2;
+                pageOne.pageToDisplay = 1;
+                pageTwo.pageToDisplay = 2;
+            }
         }
     }
 
@@ -124,13 +129,17 @@ public class PageController : MonoBehaviour
         if (pageOne.pageToDisplay < 1)
         {
             // Previous chapter
-            PrepareUpdateText();
-            UpdateText(curText.Previous);
+            if (curText.Previous != null)
+            {
+                PrepareUpdateText();
+                UpdateText(curText.Previous);
 
-            camera.Render();
+                camera.Render();
 
-            pageOne.pageToDisplay = pageOne.textInfo.pageCount - 1;
-            pageTwo.pageToDisplay = pageOne.textInfo.pageCount;
+                pageOne.pageToDisplay = pageOne.textInfo.pageCount - 1;
+                pageTwo.pageToDisplay = pageOne.textInfo.pageCount;
+
+            }
         }
     }
 
