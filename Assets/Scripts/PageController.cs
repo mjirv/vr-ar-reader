@@ -30,15 +30,10 @@ public class PageController : MonoBehaviour
     {
         using (var client = new WebClient())
         {
-            // TODO this doesn't work on Hololens emulator because access to the path is denied
-            //client.DownloadFile("http://www.gutenberg.org/ebooks/135.epub.noimages", Application.streamingAssetsPath + "/ebooks/2264.epub.noimages");
+            //TODO: Next step - allow the user to choose what book to read (input url? search? browse?)
             Stream stream = client.OpenRead("http://www.gutenberg.org/ebooks/135.epub.noimages");
             book = EpubReader.Read(stream, false);
         }
-
-        //bookPath = Application.streamingAssetsPath + "/ebooks/2264.epub.noimages";
-        //bookPath = "https://www.gutenberg.org/ebooks/135.epub.noimages";
-        //EpubBook book = EpubReader.Read(bookPath);
 
         chapterTexts = new LinkedList<string>();
 
