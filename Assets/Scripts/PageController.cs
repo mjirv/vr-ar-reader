@@ -6,6 +6,8 @@ using EpubSharp;
 using TMPro;
 using System.Text.RegularExpressions;
 using UnityEditor;
+using System.Net;
+using System.IO;
 
 public class PageController : MonoBehaviour
 {
@@ -21,12 +23,22 @@ public class PageController : MonoBehaviour
     private int startPos, endPos;
 
     private LinkedList<string> chapterTexts;
+    private EpubBook book;
 
     // Use this for initialization
     void Start()
     {
-        bookPath = Application.streamingAssetsPath + "/ebooks/pg135.epub";
-        EpubBook book = EpubReader.Read(bookPath);
+        using (var client = new WebClient())
+        {
+            // TODO this doesn't work on Hololens emulator because access to the path is denied
+            //client.DownloadFile("http://www.gutenberg.org/ebooks/135.epub.noimages", Application.streamingAssetsPath + "/ebooks/2264.epub.noimages");
+            Stream stream = client.OpenRead("http://www.gutenberg.org/ebooks/135.epub.noimages");
+            book = EpubReader.Read(stream, false);
+        }
+
+        //bookPath = Application.streamingAssetsPath + "/ebooks/2264.epub.noimages";
+        //bookPath = "https://www.gutenberg.org/ebooks/135.epub.noimages";
+        //EpubBook book = EpubReader.Read(bookPath);
 
         chapterTexts = new LinkedList<string>();
 
@@ -35,7 +47,7 @@ public class PageController : MonoBehaviour
             string newText = chapter.TextContent + '\n';
             newText = Regex.Replace(newText, "<br[^>]*>", "\n");
             newText = Regex.Replace(newText, "<p[^>]*>", "\n");
-            newText = Regex.Replace(newText, "</p>", "\n");
+            newText = Regex.Replace(newText, "</p>", "");
 
             newText = Regex.Replace(newText, "<h5[^>]*>", "<size=+1>");
             newText = Regex.Replace(newText, "</h5>", "</size>");
@@ -66,37 +78,18 @@ public class PageController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown("right"))
-        {
-            NextPage();
-        }
-        if (Input.GetKeyDown("left"))
-        {
-            PrevPage();
-        }
-        if (Input.GetMouseButtonDown(0))
-        {
-            NextPage();
-        }
-        if (Input.GetMouseButtonDown(1))
-        {
-            PrevPage();
-        }
-
-        // Make sure they can't go negative, as this can make it hard to go forward again
-        if (pageOne.pageToDisplay < 1)
-        {
-            pageOne.pageToDisplay = 1;
-        }
-
-        if (pageTwo.pageToDisplay < 2)
-        {
-            pageTwo.pageToDisplay = 2;
-        }
+        //if (Input.GetButtonDown("Fire1"))
+        //{
+        //    NextPage();
+        //}
+        //if (Input.GetButtonDown("Fire2"))
+        //{
+        //    PrevPage();
+        //}
 
     }
 
-    void NextPage()
+    public void NextPage()
     {
         pageOne.pageToDisplay += 2;
         pageTwo.pageToDisplay += 2;
@@ -121,10 +114,21 @@ public class PageController : MonoBehaviour
         }
     }
 
-    void PrevPage()
+    public void PrevPage()
     {
         pageOne.pageToDisplay -= 2;
         pageTwo.pageToDisplay -= 2;
+
+        // Make sure they can't go negative, as this can make it hard to go forward again
+        if (pageOne.pageToDisplay < 1)
+        {
+            pageOne.pageToDisplay = 1;
+        }
+
+        if (pageTwo.pageToDisplay < 2)
+        {
+            pageTwo.pageToDisplay = 2;
+        }
 
         if (pageOne.pageToDisplay < 1)
         {
